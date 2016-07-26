@@ -68,8 +68,7 @@ def set_handlers(events):
         function = event_map[event]['function']
         luigi.Task.event_handler(handler)(function)
 
-def format_message(max_print):
-    job = os.path.basename(inspect.stack()[-1][1])
+def format_message(max_print, job):
     text = ["Status report for {}".format(job)]
     if 'Failure' in events:
         text.append("*Failures:*")
@@ -90,8 +89,8 @@ def format_message(max_print):
     text = "\n".join(text)
     return text
 
-def send_message(slack_url, max_print):
-    text = format_message(max_print)
+def send_message(slack_url, max_print, job):
+    text = format_message(max_print, job)
     if not slack_url:
         print "slack_url not provided. Message will not be sent"
         print text
@@ -103,8 +102,10 @@ def send_message(slack_url, max_print):
     return True
 
 @contextmanager
-def monitor(events=['FAILURE', 'DEPENDENCY_MISSING', 'SUCCESS'], slack_url=None, max_print=5):
+def monitor(events=['FAILURE', 'DEPENDENCY_MISSING', 'SUCCESS'],
+            slack_url=None, max_print=10,
+            job_name=os.path.basename(inspect.stack()[-1][1])):
     if events:
         h = set_handlers(events)
     yield
-    m = send_message(slack_url, max_print)
+    m = send_message(slack_url, max_print, job_name)

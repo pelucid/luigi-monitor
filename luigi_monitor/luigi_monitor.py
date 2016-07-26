@@ -5,17 +5,17 @@ import luigi
 import requests
 from contextlib import contextmanager
 
-events = {}
+EVENTS = {}
 
 def discovered(task, dependency):
     raise NotImplementedError
 
 def missing(task):
     task = str(task)
-    if 'Missing' in events:
-        events['Missing'].append(task)
+    if 'Missing' in EVENTS:
+        EVENTS['Missing'].append(task)
     else:
-        events['Missing'] = [task]
+        EVENTS['Missing'] = [task]
 
 def present(task):
     raise NotImplementedError
@@ -29,18 +29,22 @@ def start(task):
 def failure(task, exception):
     task = str(task)
     failure = {'task': task, 'exception': str(exception)}
-    if 'Failure' in events:
-        events['Failure'].append(failure)
+    if 'Failure' in EVENTS:
+        EVENTS['Failure'].append(failure)
     else:
-        events['Failure'] = [failure]
+        EVENTS['Failure'] = [failure]
 
 def success(task):
     task = str(task)
-    if 'Failure' in events:
-        events['Failure'] = [failure for failure in events['Failure']
+
+    EVENTS['Success'] = EVENTS.get('Success', [])
+    EVENTS['Success'].append({'task': task})
+
+    if 'Failure' in EVENTS:
+        EVENTS['Failure'] = [failure for failure in EVENTS['Failure']
                              if task not in failure['task']]
-    if 'Missing' in events:
-        events['Missing'] = [missing for missing in events['Missing']
+    if 'Missing' in EVENTS:
+        EVENTS['Missing'] = [missing for missing in EVENTS['Missing']
                              if task not in missing]
 
 def processing_time(task, time):
@@ -57,11 +61,11 @@ event_map = {
     "PROCESSING_TIME": {"function": processing_time, "handler": luigi.Event.PROCESSING_TIME}
 }
 
-def set_handlers(events):
-    if not isinstance(events, list):
-        raise Exception("events must be a list")
+def set_handlers(EVENTS):
+    if not isinstance(EVENTS, list):
+        raise Exception("EVENTS must be a list")
 
-    for event in events:
+    for event in EVENTS:
         if not event in event_map:
             raise Exception("{} is not a valid event.".format(event))
         handler = event_map[event]['handler']
@@ -70,19 +74,26 @@ def set_handlers(events):
 
 def format_message(max_print, job):
     text = ["Status report for {}".format(job)]
-    if 'Failure' in events:
+    if 'Success' in EVENTS:
+        text.append("*Successes:*")
+        if len(EVENTS['Success']) > max_print:
+            text.append("More than %d Successes. Please check logs." % max_print)
+        else:
+            for success in EVENTS['Success']:
+                text.append("Task: {}".format(success['task']))
+    if 'Failure' in EVENTS:
         text.append("*Failures:*")
-        if len(events['Failure']) > max_print:
+        if len(EVENTS['Failure']) > max_print:
             text.append("More than %d failures. Please check logs." % max_print)
         else:
-            for failure in events['Failure']:
+            for failure in EVENTS['Failure']:
                 text.append("Task: {}; Exception: {}".format(failure['task'], failure['exception']))
-    if 'Missing' in events:
+    if 'Missing' in EVENTS:
         text.append("*Tasks with missing dependencies:*")
-        if len(events['Missing']) > max_print:
+        if len(EVENTS['Missing']) > max_print:
             text.append("More than %d tasks with missing dependencies. Please check logs." % max_print)
         else:
-            for missing in events['Missing']:
+            for missing in EVENTS['Missing']:
                 text.append(missing)
     if len(text) == 1:
         text.append("Job ran successfully!")
@@ -102,10 +113,13 @@ def send_message(slack_url, max_print, job):
     return True
 
 @contextmanager
-def monitor(events=['FAILURE', 'DEPENDENCY_MISSING', 'SUCCESS'],
+def monitor(EVENTS=['FAILURE', 'DEPENDENCY_MISSING', 'SUCCESS'],
             slack_url=None, max_print=10,
             job_name=os.path.basename(inspect.stack()[-1][1])):
-    if events:
-        h = set_handlers(events)
-    yield
-    m = send_message(slack_url, max_print, job_name)
+    if EVENTS:
+        h = set_handlers(EVENTS)
+    # in luigi 2 the binary raises a sys.exit call
+    try:
+        yield
+    except SystemExit:
+        send_message(slack_url, max_print, job_name)

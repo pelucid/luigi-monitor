@@ -100,17 +100,34 @@ def format_message(max_print, job):
     text = "\n".join(text)
     return text
 
-def send_message(slack_url, max_print, job):
-    text = format_message(max_print, job)
+
+def send_flow_result(slack_url, max_print, job):
+    payload = {'text': format_message(max_print, job)}
+    return send_message(slack_url, payload)
+
+
+def send_validation_warning(slack_url, user, warning):
+    """Send a custom warning to given slack_url from a specific user."""
+    job_name = os.path.basename(inspect.stack()[-1][1])
+    payload = {
+        'text': '{}\n{}'.format(job_name, warning),
+        'username': user.name,
+        'icon_emoji': user.icon
+    }
+    return send_message(slack_url, payload)
+
+
+def send_message(slack_url, payload):
     if not slack_url:
         print "slack_url not provided. Message will not be sent"
-        print text
+        print payload['text']
         return False
-    payload = {"text": text}
+
     r = requests.post(slack_url, data=json.dumps(payload))
     if not r.status_code == 200:
         raise Exception(r.text)
     return True
+
 
 @contextmanager
 def monitor(EVENTS=['FAILURE', 'DEPENDENCY_MISSING', 'SUCCESS'],
@@ -122,4 +139,4 @@ def monitor(EVENTS=['FAILURE', 'DEPENDENCY_MISSING', 'SUCCESS'],
     try:
         yield
     except SystemExit:
-        send_message(slack_url, max_print, job_name)
+        send_flow_result(slack_url, max_print, job_name)

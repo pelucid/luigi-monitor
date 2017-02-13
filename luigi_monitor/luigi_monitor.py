@@ -100,8 +100,18 @@ def format_message(max_print, job):
     text = "\n".join(text)
     return text
 
-def send_message(slack_url, max_print, job):
+
+def send_flow_result(slack_url, max_print, job):
     text = format_message(max_print, job)
+    return send_message(slack_url, text)
+
+
+def send_validation_warning(slack_url, warning):
+    """Send a custom warning from an integrity report validation check."""
+    return send_message(slack_url, warning)
+
+
+def send_message(slack_url, text):
     if not slack_url:
         print "slack_url not provided. Message will not be sent"
         print text
@@ -111,6 +121,7 @@ def send_message(slack_url, max_print, job):
     if not r.status_code == 200:
         raise Exception(r.text)
     return True
+
 
 @contextmanager
 def monitor(EVENTS=['FAILURE', 'DEPENDENCY_MISSING', 'SUCCESS'],
@@ -122,4 +133,4 @@ def monitor(EVENTS=['FAILURE', 'DEPENDENCY_MISSING', 'SUCCESS'],
     try:
         yield
     except SystemExit:
-        send_message(slack_url, max_print, job_name)
+        send_flow_result(slack_url, max_print, job_name)

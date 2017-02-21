@@ -106,9 +106,8 @@ def send_flow_result(slack_url, max_print, job):
     return send_message(slack_url, payload)
 
 
-def send_validation_warning(slack_url, user, warning):
+def send_validation_warning(slack_url, user, warning, job_name):
     """Send a custom warning to given slack_url from a specific user."""
-    job_name = os.path.basename(inspect.stack()[-1][1])
     payload = {
         'text': '{}\n{}'.format(job_name, warning),
         'username': user.name,

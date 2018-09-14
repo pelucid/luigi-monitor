@@ -107,8 +107,8 @@ def format_message(max_print, job):
     slack_message_payload_attachments = {"attachments": []}
 
     if 'Success' in EVENTS:
-        success_attachement = get_success_slack_attachment(max_print)
-        slack_message_payload_attachments['attachments'].append(success_attachement)
+        success_attachment = get_success_slack_attachment(max_print)
+        slack_message_payload_attachments['attachments'].append(success_attachment)
 
     if 'Failure' in EVENTS:
         failure_attachment = get_failure_slack_attachment(max_print)
@@ -149,16 +149,16 @@ def get_failure_slack_attachment(max_print):
 
 
 def get_success_slack_attachment(max_print):
-    success_attachement = slack_attachment("*Successes:*", "good")
+    success_attachment = slack_attachment("*Successes:*", "good")
     if len(EVENTS['Success']) > max_print:
-        success_attachement['fields'][0]['value'] = ("More than %d Successes. Please check logs." % max_print)
+        success_attachment['fields'][0]['value'] = ("More than %d Successes. Please check logs." % max_print)
     else:
         successful_tasks = []
         for success in EVENTS['Success']:
             successful_tasks.append("Task: {}".format(success['task']))
         successful_tasks = "\n".join(successful_tasks)
-        success_attachement['fields'][0]['value'] = successful_tasks
-    return success_attachement
+        success_attachment['fields'][0]['value'] = successful_tasks
+    return success_attachment
 
 
 def send_flow_result(slack_url, max_print, job):

@@ -103,7 +103,7 @@ def slack_attachment(text, color):
 
 
 def format_message(max_print, job):
-    job_status_title = "Status report for {}".format(job)
+    job_status_report_title = "Status report for {}".format(job)
     slack_message_payload_attachments = {"attachments": []}
 
     if 'Success' in EVENTS:
@@ -118,7 +118,7 @@ def format_message(max_print, job):
         missing_attachment = get_missing_dependencies_slack_attachement(max_print)
         slack_message_payload_attachments['attachments'].append(missing_attachment)
 
-    return job_status_title, slack_message_payload_attachments
+    return job_status_report_title, slack_message_payload_attachments
 
 
 def get_missing_dependencies_slack_attachement(max_print):

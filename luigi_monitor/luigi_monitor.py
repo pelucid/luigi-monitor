@@ -7,8 +7,10 @@ from contextlib import contextmanager
 
 EVENTS = {}
 
+
 def discovered(task, dependency):
     raise NotImplementedError
+
 
 def missing(task, message=None):
     task = str(task)
@@ -19,14 +21,18 @@ def missing(task, message=None):
     else:
         EVENTS['Missing'] = [task]
 
+
 def present(task):
     raise NotImplementedError
+
 
 def broken(task, exception):
     raise NotImplementedError
 
+
 def start(task):
     raise NotImplementedError
+
 
 def failure(task, exception):
     task = str(task)
@@ -36,8 +42,13 @@ def failure(task, exception):
     else:
         EVENTS['Failure'] = [failure]
 
+
 def success(task):
+    on_success_message = task.on_success()
     task = str(task)
+
+    if on_success_message:
+        task = task + " INFO: {}".format(on_success_message)
 
     EVENTS['Success'] = EVENTS.get('Success', [])
     EVENTS['Success'].append({'task': task})
@@ -49,8 +60,10 @@ def success(task):
         EVENTS['Missing'] = [missing for missing in EVENTS['Missing']
                              if task not in missing]
 
+
 def processing_time(task, time):
     raise NotImplementedError
+
 
 event_map = {
     "DEPENDENCY_DISCOVERED": {"function": discovered, "handler": luigi.Event.DEPENDENCY_DISCOVERED},
@@ -63,6 +76,7 @@ event_map = {
     "PROCESSING_TIME": {"function": processing_time, "handler": luigi.Event.PROCESSING_TIME}
 }
 
+
 def set_handlers(EVENTS):
     if not isinstance(EVENTS, list):
         raise Exception("EVENTS must be a list")
@@ -74,37 +88,83 @@ def set_handlers(EVENTS):
         function = event_map[event]['function']
         luigi.Task.event_handler(handler)(function)
 
+
+def slack_attachment(text, color):
+    """See https://api.slack.com/docs/message-attachments (for our luigi-monitor status messages)"""
+    return {
+        "text": text,
+        "color": color,
+        "fields": [{
+            "title": None,
+            "value": None,
+            "short": False
+        }]
+    }
+
+
 def format_message(max_print, job):
-    text = ["Status report for {}".format(job)]
+    job_status_title = "Status report for {}".format(job)
+    slack_message_payload_attachments = {"attachments": []}
+
     if 'Success' in EVENTS:
-        text.append("*Successes:*")
-        if len(EVENTS['Success']) > max_print:
-            text.append("More than %d Successes. Please check logs." % max_print)
-        else:
-            for success in EVENTS['Success']:
-                text.append("Task: {}".format(success['task']))
+        success_attachement = get_success_slack_attachment(max_print)
+        slack_message_payload_attachments['attachments'].append(success_attachement)
+
     if 'Failure' in EVENTS:
-        text.append("*Failures:*")
-        if len(EVENTS['Failure']) > max_print:
-            text.append("More than %d failures. Please check logs." % max_print)
-        else:
-            for failure in EVENTS['Failure']:
-                text.append("Task: {}; Exception: {}".format(failure['task'], failure['exception']))
+        failure_attachment = get_failure_slack_attachment(max_print)
+        slack_message_payload_attachments['attachments'].append(failure_attachment)
+
     if 'Missing' in EVENTS:
-        text.append("*Tasks with missing dependencies:*")
-        if len(EVENTS['Missing']) > max_print:
-            text.append("More than %d tasks with missing dependencies. Please check logs." % max_print)
-        else:
-            for missing in EVENTS['Missing']:
-                text.append(missing)
-    if len(text) == 1:
-        text.append("Job ran successfully!")
-    text = "\n".join(text)
-    return text
+        missing_attachment = get_missing_dependencies_slack_attachement(max_print)
+        slack_message_payload_attachments['attachments'].append(missing_attachment)
+
+    return job_status_title, slack_message_payload_attachments
+
+
+def get_missing_dependencies_slack_attachement(max_print):
+    missing_attachment = slack_attachment("*Tasks with missing dependencies:*", "#439FE0")
+    if len(EVENTS['Missing']) > max_print:
+        missing_attachment['fields'][0]['value'] = (
+            "More than %d tasks with missing dependencies. Please check logs." % max_print)
+    else:
+        tasks_with_missing_dependencies = []
+        for missing in EVENTS['Missing']:
+            tasks_with_missing_dependencies.append(missing)
+        tasks_with_missing_dependencies = "\n".join(tasks_with_missing_dependencies)
+        missing_attachment['fields'][0]['value'] = tasks_with_missing_dependencies
+    return missing_attachment
+
+
+def get_failure_slack_attachment(max_print):
+    failure_attachment = slack_attachment("*Failure:*", "danger")
+    if len(EVENTS['Failure']) > max_print:
+        failure_attachment['fields'][0]['value'] = ("More than %d failures. Please check logs." % max_print)
+    else:
+        failed_tasks = []
+        for failure in EVENTS['Failure']:
+            failed_tasks.append("Task: {}; Exception: {}".format(failure['task'], failure['exception']))
+        failed_tasks = "\n".join(failed_tasks)
+        failure_attachment['fields'][0]['value'] = failed_tasks
+    return failure_attachment
+
+
+def get_success_slack_attachment(max_print):
+    success_attachement = slack_attachment("*Successes:*", "good")
+    if len(EVENTS['Success']) > max_print:
+        success_attachement['fields'][0]['value'] = ("More than %d Successes. Please check logs." % max_print)
+    else:
+        successful_tasks = []
+        for success in EVENTS['Success']:
+            successful_tasks.append("Task: {}".format(success['task']))
+        successful_tasks = "\n".join(successful_tasks)
+        success_attachement['fields'][0]['value'] = successful_tasks
+    return success_attachement
 
 
 def send_flow_result(slack_url, max_print, job):
-    payload = {'text': format_message(max_print, job)}
+    text, attachments = format_message(max_print, job)
+    payload = {'text': text}
+    payload.update(attachments)
     return send_message(slack_url, payload)
 
 

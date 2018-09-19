@@ -7,19 +7,23 @@ from contextlib import contextmanager
 
 EVENTS = {}
 
+SUCCESS = 'Success'
+FAILURE = 'Failure'
+MISSING = 'Missing'
+
 
 class SlackNotifications(object):
-    slack_events = ['Success', 'Failure', 'Missing']
+    slack_events = [SUCCESS, FAILURE, MISSING]
     events_message_cfg = {
-        'Success': {
+        SUCCESS: {
             'title': 'Successes',
             'color': 'good'
         },
-        'Failure': {
+        FAILURE: {
             'title': 'Failures',
             'color': 'danger'
         },
-        'Missing': {
+        MISSING: {
             'title': 'Tasks with missing dependencies',
             'color': '#439FE0'
         }
@@ -49,11 +53,11 @@ class SlackNotifications(object):
     def event_task_message(self, event):
         event_tasks = []
         for task in self.raised_events[event]:
-            if event == 'Success':
+            if event == SUCCESS:
                 event_tasks.append("Task: {}".format(task['task']))
-            elif event == 'Failure':
+            elif event == FAILURE:
                 event_tasks.append("Task: {}; Exception: {}".format(task['task'], task['exception']))
-            elif event == 'Missing':
+            elif event == MISSING:
                 event_tasks.append(task)
         event_tasks = "\n".join(event_tasks)
         return event_tasks

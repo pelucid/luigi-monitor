@@ -40,15 +40,27 @@ class SlackNotifications(object):
     def _create_attachment(self, event, attachments):
         event_attachment = self._get_event_attachment(event)
         if len(self.raised_events[event]) > self.max_print:
-            event_attachment['fields'][0]['value'] = "More than {} {}. Please check logs.".format(
-                str(self.max_print), self.events_message_cfg[event]['title'].lower())
+            event_attachment['fields'][0]['value'] = self.max_print_message(event)
         else:
-            event_tasks = []
-            for task in self.raised_events[event]:
-                event_tasks.append(task)
-            event_tasks = "\n".join(event_tasks)
+            event_tasks = self.event_task_message(event)
             event_attachment['fields'][0]['value'] = event_tasks
         attachments.append(event_attachment)
+
+    def event_task_message(self, event):
+        event_tasks = []
+        for task in self.raised_events[event]:
+            if event == 'Success':
+                event_tasks.append("Task: {}".format(task['task']))
+            elif event == 'Failure':
+                event_tasks.append("Task: {}; Exception: {}".format(task['task'], task['exception']))
+            elif event == 'Missing':
+                event_tasks.append(task)
+        event_tasks = "\n".join(event_tasks)
+        return event_tasks
+
+    def max_print_message(self, event):
+        return "More than {} {}. Please check logs.".format(
+            str(self.max_print), self.events_message_cfg[event]['title'].lower())
 
     def _get_event_attachment(self, event):
         """See https://api.slack.com/docs/message-attachments (for our luigi-monitor status messages)"""

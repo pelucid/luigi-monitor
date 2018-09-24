@@ -35,7 +35,9 @@ class SlackNotifications(object):
 
     @property
     def no_raised_events_attachment(self):
-        return self._get_event_attachment('No raised events (Success/Failure/Missing) - job not run?', '#f7a70a')
+        return self._get_event_attachment(
+            '*No raised events (Success/Failure/Missing)* - possibly:\n  - job not run\n  - job already run\n... No new data to process?',
+            '#f7a70a')
 
     def get_slack_message_attachments(self):
         attachments = []
@@ -46,7 +48,7 @@ class SlackNotifications(object):
         return {"attachments": attachments}
 
     def _create_attachment(self, event, attachments):
-        event_attachment = self._get_event_attachment(self.events_message_cfg[event]['title'],
+        event_attachment = self._get_event_attachment("*{}*".format(self.events_message_cfg[event]['title']),
                                                       self.events_message_cfg[event]['color'])
         if len(self.raised_events[event]) > self.max_print:
             event_attachment['fields'][0]['value'] = self.max_print_message(event)
@@ -82,7 +84,7 @@ class SlackNotifications(object):
     def _get_event_attachment(self, event_title, event_color):
         """See https://api.slack.com/docs/message-attachments (for our luigi-monitor status messages)"""
         return {
-            "text": "*{}*".format(event_title),
+            "text": event_title,
             "color": event_color,
             "fields": [{
                 "title": None,

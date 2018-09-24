@@ -33,16 +33,26 @@ class SlackNotifications(object):
         self.raised_events = raised_events
         self.max_print = max_print
 
+    @property
+    def no_raised_events_attachment(self):
+        return self._get_event_attachment('No raised events (Success/Failure/Missing) - job not run?', '#f7a70a')
+
     def get_slack_message_attachments(self):
         attachments = []
         for event in self.slack_events:
             if event in self.raised_events:
                 self._create_attachment(event, attachments)
-
+        self._check_attachments_if_empty(attachments)
         return {"attachments": attachments}
 
+    def _check_attachments_if_empty(self, attachments):
+        if not attachments:
+            # No raised events (Success/Missing/Failure) - job not run?
+            attachments.append(self.no_raised_events_attachment)
+
     def _create_attachment(self, event, attachments):
-        event_attachment = self._get_event_attachment(event)
+        event_attachment = self._get_event_attachment(self.events_message_cfg[event]['title'],
+                                                      self.events_message_cfg[event]['color'])
         if len(self.raised_events[event]) > self.max_print:
             event_attachment['fields'][0]['value'] = self.max_print_message(event)
         else:
@@ -66,11 +76,11 @@ class SlackNotifications(object):
         return "More than {} {}. Please check logs.".format(
             str(self.max_print), self.events_message_cfg[event]['title'].lower())
 
-    def _get_event_attachment(self, event):
+    def _get_event_attachment(self, event_title, event_color):
         """See https://api.slack.com/docs/message-attachments (for our luigi-monitor status messages)"""
         return {
-            "text": "*{}*".format(self.events_message_cfg[event]['title']),
-            "color": self.events_message_cfg[event]['color'],
+            "text": "*{}*".format(event_title),
+            "color": event_color,
             "fields": [{
                 "title": None,
                 "value": None,

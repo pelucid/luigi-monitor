@@ -40,15 +40,10 @@ class SlackNotifications(object):
     def get_slack_message_attachments(self):
         attachments = []
         for event in self.slack_events:
+
             if event in self.raised_events:
                 self._create_attachment(event, attachments)
-        self._check_attachments_if_empty(attachments)
         return {"attachments": attachments}
-
-    def _check_attachments_if_empty(self, attachments):
-        if not attachments:
-            # No raised events (Success/Missing/Failure) - job not run?
-            attachments.append(self.no_raised_events_attachment)
 
     def _create_attachment(self, event, attachments):
         event_attachment = self._get_event_attachment(self.events_message_cfg[event]['title'],
@@ -57,18 +52,26 @@ class SlackNotifications(object):
             event_attachment['fields'][0]['value'] = self.max_print_message(event)
         else:
             event_tasks = self.event_task_message(event)
-            event_attachment['fields'][0]['value'] = event_tasks
-        attachments.append(event_attachment)
+            if event_tasks:
+                event_attachment['fields'][0]['value'] = event_tasks
+                attachments.append(event_attachment)
 
     def event_task_message(self, event):
         event_tasks = []
         for task in self.raised_events[event]:
+
+            if event == FAILURE:
+                if task['task'] == 'MissingDependencyCompleteTask()':
+                    continue
+                event_tasks.append("Task: {}; Exception: {}".format(task['task'], task['exception']))
+
+            if event == MISSING:
+                event_tasks.append(task)
+
             if event == SUCCESS:
                 event_tasks.append("Task: {}".format(task['task']))
-            elif event == FAILURE:
-                event_tasks.append("Task: {}; Exception: {}".format(task['task'], task['exception']))
-            elif event == MISSING:
-                event_tasks.append(task)
+
+        event_tasks = set(event_tasks)
         event_tasks = "\n".join(event_tasks)
         return event_tasks
 

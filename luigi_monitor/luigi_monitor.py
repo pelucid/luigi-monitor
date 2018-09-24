@@ -69,7 +69,7 @@ class SlackNotifications(object):
     def _get_event_attachment(self, event):
         """See https://api.slack.com/docs/message-attachments (for our luigi-monitor status messages)"""
         return {
-            "text": self.events_message_cfg[event]['title'],
+            "text": "*{}*".format(self.events_message_cfg[event]['title']),
             "color": self.events_message_cfg[event]['color'],
             "fields": [{
                 "title": None,

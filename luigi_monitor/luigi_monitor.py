@@ -63,8 +63,6 @@ class SlackNotifications(object):
         for task in self.raised_events[event]:
 
             if event == FAILURE:
-                if task['task'] == 'MissingDependencyCompleteTask()':
-                    continue
                 event_tasks.append("Task: {}; Exception: {}".format(task['task'], task['exception']))
 
             if event == MISSING:
@@ -73,7 +71,6 @@ class SlackNotifications(object):
             if event == SUCCESS:
                 event_tasks.append("Task: {}".format(task['task']))
 
-        event_tasks = set(event_tasks)
         event_tasks = "\n".join(event_tasks)
         return event_tasks
 

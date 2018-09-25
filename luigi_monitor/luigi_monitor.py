@@ -56,7 +56,7 @@ class SlackNotifications(object):
             event_tasks = self.event_task_message(event)
             if event_tasks:
                 event_attachment['fields'][0]['value'] = event_tasks
-                attachments.append(event_attachment)
+        attachments.append(event_attachment)
 
     def event_task_message(self, event):
         event_tasks = []

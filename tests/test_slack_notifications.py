@@ -68,3 +68,23 @@ def assert_slack_attachments_are_equal(actual, expected):
     assert actual['fields'][0]['value'] == expected['fields'][0]['value']
     assert actual['fields'][0]['title'] is None
     assert actual['fields'][0]['short'] is False
+
+
+@pytest.fixture
+def raised_events():
+    return {SUCCESS: [{'task': 'SuccessLuigiTask()'}, {'task': 'SuccessLuigiTask()'}]}
+
+
+# Parametrise this to be with and without a secondary event which is below max_print
+def test_slack_notifications_get_slack_attachments_exceeding_max_print(raised_events):
+    max_print = 1 # since there are two raised events in the fixture
+    slack_notifications = SlackNotifications(raised_events, max_print)
+    slack_attachment = slack_notifications.get_slack_message_attachments()['attachments']
+    assert slack_attachment[0]['text'] == '*Successes*'
+    assert slack_attachment[0]['fields'][0]['value'] == 'More than 1 successes. Please check logs.'
+
+
+
+def test_slack_notifications_get_slack_attachments_no_raised_events_message():
+    pass
+

@@ -95,10 +95,8 @@ def discovered(task, dependency):
     raise NotImplementedError
 
 
-def missing(task, message=None):
+def missing(task):
     task = str(task)
-    if message:
-        task = task + ' INFO: {}'.format(message)
     if 'Missing' in EVENTS:
         EVENTS['Missing'].append(task)
     else:

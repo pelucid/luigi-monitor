@@ -42,6 +42,19 @@ def expected_slack_attachments(request):
      [('Failures', 'danger', 'Task: FailureLuigiTask(); Exception: Exception()')]),
     # Missing slack attachment
     ({MISSING: ['MissingLuigiTask()']}, [('Tasks with missing dependencies', '#439FE0', 'MissingLuigiTask()')]),
+    # Success + Success
+    ({SUCCESS: [{'task': 'SuccessLuigiTask()'}, {'task': 'SuccessLuigiTask()'}]},
+     [('Successes', 'good', 'Task: SuccessLuigiTask()\nTask: SuccessLuigiTask()')]),
+    # Success + Failure
+    ({SUCCESS: [{'task': 'SuccessLuigiTask()'}],
+      FAILURE: [{'task': 'FailureLuigiTask()', 'exception': 'Exception()'}]},
+     [('Successes', 'good', 'Task: SuccessLuigiTask()'),
+      ('Failures', 'danger', 'Task: FailureLuigiTask(); Exception: Exception()')]),
+    # Success + Success + Failure
+    ({SUCCESS: [{'task': 'SuccessLuigiTask()'}, {'task': 'SuccessLuigiTask()'}],
+      FAILURE: [{'task': 'FailureLuigiTask()', 'exception': 'Exception()'}]},
+     [('Successes', 'good', 'Task: SuccessLuigiTask()\nTask: SuccessLuigiTask()'),
+      ('Failures', 'danger', 'Task: FailureLuigiTask(); Exception: Exception()')])
 ], indirect=['slack_notifications', 'expected_slack_attachments'])
 def test_slack_notifications_get_slack_attachments(slack_notifications, expected_slack_attachments):
     actual_slack_attachments = slack_notifications.get_slack_message_attachments()['attachments']

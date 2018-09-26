@@ -1,32 +1,19 @@
 language: python
 python:
-  - "2.7"
-
-# setup environment variables
+- '2.7'
 env: PYTHONPATH=$TRAVIS_BUILD_DIR/..:$PYTHONPATH
-
 before_install:
-  - sudo chown travis /var/log
-
-# command to install dependencies
+- sudo chown travis /var/log
 install:
-  - make deps
-
-# give permissions to write to log file
+- make deps
 before_script:
-  - sudo mkdir $TRAVIS_BUILD_DIR/logs/
-  - sudo chown travis $TRAVIS_BUILD_DIR/logs/
-
-# run tests
+- sudo mkdir $TRAVIS_BUILD_DIR/logs/
+- sudo chown travis $TRAVIS_BUILD_DIR/logs/
 script:
-  - make test
-
-
+- make test
 notifications:
   email:
     recipients:
-      - developers@growthintel.com
-
+    - developers@growthintel.com
   slack:
-    rooms:
-      secure: "TlcA3vO995ZtVQiW4Rto1sLHZEZT6a7gzJyJk8dTxJEj0mNGQANgqdtcXZOSmITKdXRzc0kHkHJ7Z3Que2tUhCOxLdLwX7liLm1PGjrCs1QDtt90YWBnarPLpgneUO/2HQ0SgBDouJZm9S43dorWNcIXqUiz8ytOeAG2QusE2wZN/aFNdXN0e5qMeZlbpOQoOEfguNDolK+81HwZVCT+UHwLqLK1md4nEkv0Ky/HLhnKeum0Xt2H8DrHDPwnIZZxD7uytXxhmIQkHK22bcHRQX2fWWPHVK6hzU7QvMGnRf8SO9qrUNT0+JS+dwgyAp34UygqRw2nzIcWqKjEfK7OGIhrC6DI0gx0v0DZofede8u8qrLXpjH9yDCDlWK5zxm3/l+m2YuOLA5OmAP+gI3uwDXrMLPD+s/Bm3/wNcNI7gDfx0SYS+r23zwbHZOtX9ze/AwivShg8U/e6AC77J7vtr9wABEkML5qzeQWTTVsvqsDFvw7g25FqTvIBZJGZwTUaUVUIeHIVpjaskEywzrI9PMachlEkHo2UgydvAkMIgcDau6Y5OThE76m7giwmvVNUFpgrpTyVO91euU43rcpS/1ApjRxOju81KoGZRqrnYq+J8WhvNusj5hjKaVRRjOW6aMNXcyZLGk9Ma9w8Xl2ad9sx2N5D7eZjJuE6fO3Dg8="
+    secure: kQla9KcRS43XFBc4fscOWjm45iCBPYHo2cQqDdcWnElfj2Pz00YWPMpYGAUo9Z1xrnZhMeCnaYM1xFLKtZfl7rcg/J0XznVvE5OHH9PtuamYvISTPL5zVrvlGMhjbwX+TDUhDN4wTX7XzDH4E3fIFttjT28gHRhOYL6l2TlXil2Oq8CoPEvBLgw6npmmXgz/kZnXXIkvrh7QOCbCk+BTCOx8fc8LkwJy5TEFOWxqDgUZrPY/7dSoqI9sw/chhAqZvmEvmZ86zbgF6eFBgKdA4vT7kG6ue2scC1LfkpO6Eh3vxqaU01LByvevI4/p8YyX6l5f9zgwOvxmSjO7LarpTgLTGAId4dwOur+Op7U+/oWdUVF+n7sGzPwWg2DeAwHsyGBaIeNg27VBG/95hvj05xM68zj/t/6h1NOUp9DOVSrP93dtx+LFP4SriU60KXbnR573KgvtDp7gsE/2jo7+4oBA/dK4kWtSS263N8FMQdbttH/hp+IB+K3eOdMgHAoXffberTKNwKAJsX5cu49q5JpIzE5xR+lKOQ1hCzocSTP/c8PlVXtjIYT1e/hPsCA2ocDJTvBz6Egb7zjcGJitOrYDf7GfB02gqgAKhu7887lrodAhNaFi3zU81ziQL9j7YkOq89/dfvGavh2ObhSzko8bMIHzvBKl8h/tWLQ92NU=

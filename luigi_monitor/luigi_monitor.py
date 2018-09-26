@@ -47,7 +47,7 @@ class SlackNotifications(object):
                 attachments.append(event_attachment)
         if not attachments:
             attachments.append(self._no_raised_events_attachment)
-        return {"attachments": attachments}
+        return attachments
 
     def _create_attachment(self, event):
         event_attachment = self._get_event_attachment("*{}*".format(self.events_message_cfg[event]['title']),
@@ -181,8 +181,7 @@ def format_message(max_print, job):
 
 def send_flow_result(slack_url, max_print, job):
     text, attachments = format_message(max_print, job)
-    payload = {'text': text}
-    payload.update(attachments)
+    payload = {'text': text, 'attachments': attachments}
     return send_message(slack_url, payload)
 
 

@@ -13,13 +13,13 @@ def max_print():
     Example:
         Given 3 successful tasks
 
-        when max_print is set to 3
+        when max_print is set to 3, slack message becomes;
             Successful tasks:
             Task1
             Task2
             Task3
 
-        when max_print is set to 2
+        when max_print is set to 2, slack message becomes;
             More than 2 successful tasks!
             """
     return 10

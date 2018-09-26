@@ -34,7 +34,7 @@ class SlackNotifications(object):
         self.max_print = max_print
 
     @property
-    def no_raised_events_attachment(self):
+    def _no_raised_events_attachment(self):
         return self._get_event_attachment(
             '*No raised events (Success/Failure/Missing)* - possibly:\n  - job not run\n  - job already run\n... No new data to process?',
             '#f7a70a')
@@ -46,21 +46,21 @@ class SlackNotifications(object):
                 event_attachment = self._create_attachment(event)
                 attachments.append(event_attachment)
         if not attachments:
-            attachments.append(self.no_raised_events_attachment)
+            attachments.append(self._no_raised_events_attachment)
         return {"attachments": attachments}
 
     def _create_attachment(self, event):
         event_attachment = self._get_event_attachment("*{}*".format(self.events_message_cfg[event]['title']),
                                                       self.events_message_cfg[event]['color'])
         if len(self.raised_events[event]) > self.max_print:
-            event_attachment['fields'][0]['value'] = self.max_print_message(event)
+            event_attachment['fields'][0]['value'] = self._max_print_message(event)
         else:
-            event_tasks = self.event_task_message(event)
+            event_tasks = self._event_task_message(event)
             if event_tasks:
                 event_attachment['fields'][0]['value'] = event_tasks
         return event_attachment
 
-    def event_task_message(self, event):
+    def _event_task_message(self, event):
         event_tasks = []
         for task in self.raised_events[event]:
 
@@ -76,7 +76,7 @@ class SlackNotifications(object):
         event_tasks = "\n".join(event_tasks)
         return event_tasks
 
-    def max_print_message(self, event):
+    def _max_print_message(self, event):
         return "More than {} {}. Please check logs.".format(
             str(self.max_print), self.events_message_cfg[event]['title'].lower())
 

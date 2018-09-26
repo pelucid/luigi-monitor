@@ -1,0 +1,32 @@
+language: python
+python:
+  - "2.7"
+
+# setup environment variables
+env: PYTHONPATH=$TRAVIS_BUILD_DIR/..:$PYTHONPATH
+
+before_install:
+  - sudo chown travis /var/log
+
+# command to install dependencies
+install:
+  - make deps
+
+# give permissions to write to log file
+before_script:
+  - sudo mkdir $TRAVIS_BUILD_DIR/logs/
+  - sudo chown travis $TRAVIS_BUILD_DIR/logs/
+
+# run tests
+script:
+  - make test
+
+
+notifications:
+  email:
+    recipients:
+      - developers@growthintel.com
+
+  slack:
+    rooms:
+      secure: "StillNeedToAddToken"

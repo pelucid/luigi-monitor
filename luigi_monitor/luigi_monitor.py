@@ -42,12 +42,14 @@ class SlackNotifications(object):
     def get_slack_message_attachments(self):
         attachments = []
         for event in self.slack_events:
-
             if event in self.raised_events:
-                self._create_attachment(event, attachments)
+                event_attachment = self._create_attachment(event)
+                attachments.append(event_attachment)
+        if not attachments:
+            attachments.append(self.no_raised_events_attachment)
         return {"attachments": attachments}
 
-    def _create_attachment(self, event, attachments):
+    def _create_attachment(self, event):
         event_attachment = self._get_event_attachment("*{}*".format(self.events_message_cfg[event]['title']),
                                                       self.events_message_cfg[event]['color'])
         if len(self.raised_events[event]) > self.max_print:
@@ -56,7 +58,7 @@ class SlackNotifications(object):
             event_tasks = self.event_task_message(event)
             if event_tasks:
                 event_attachment['fields'][0]['value'] = event_tasks
-        attachments.append(event_attachment)
+        return event_attachment
 
     def event_task_message(self, event):
         event_tasks = []

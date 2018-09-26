@@ -1,19 +1,21 @@
 language: python
 python:
-- '2.7'
+  - '2.7'
 env: PYTHONPATH=$TRAVIS_BUILD_DIR/..:$PYTHONPATH
 before_install:
-- sudo chown travis /var/log
+  - sudo chown travis /var/log
 install:
-- make deps
+  - make deps
 before_script:
-- sudo mkdir $TRAVIS_BUILD_DIR/logs/
-- sudo chown travis $TRAVIS_BUILD_DIR/logs/
+  - sudo mkdir $TRAVIS_BUILD_DIR/logs/
+  - sudo chown travis $TRAVIS_BUILD_DIR/logs/
 script:
-- make test
+  - make test
 notifications:
   email:
     recipients:
     - developers@growthintel.com
+
   slack:
-    secure: "FaMnH6SMxYa9s4l83K7y9LvIO2xjIRwGw0qcHSbnKPJSGDjyn1lqZX8ZcbfGhQv+j2+mqcjEW8gL7YAl/zVN5Yl/vv+4O6mvzdlyUrS7RRzRGwbhFeroWTJp269kC53PG+c20OXymroG89Oz8OCvwm9aKY9wdgvnbJTKj5c5PxmnR/7LT1kAWK/LFqmMurLAG2zGtfIvH6zi/X519ARdYSE4TCyLc6sZRoVJpC50TT0/wMgXTCzCU7SPoEM32CkvjaWJ/bdHy2a92YvLAUo6eP722P61/TR2SRA3EXffQmdfZ6pZqitR8kYbgw7fFoMzA2Fccbr7OlBYMOfZt1ocQoYECkycixQ79/8oSILBzLxYvwsi+gYB4/m4pg8aW5wIPKM//efgPn1wumwL3KjAQvXULRxmCsmJafRm2dMHWJKKwp7LwFes3il2sgpo6g0QMRZvtcbjffhGJGr1/BlkL4lVAEPcrbr1XAJd9C6Y1yJyAk0O1Wbmf6v0PnX3yz1NphZZMCQq0cyLpG/sFK82MuUV4C1Zh3iZurJgg2IU0ZkFa2HEJB727Y8leC9kHRolLa+kmSehZFepN22n4+WPySM58vrlDm3aImxhdoGL7TPpbBzWQhBy1jJyOr3JKuY4gWpEuIWPwbCshVfKce8GqxMpUU2woLXdE8SaUp2p/1U="
+    rooms:
+      secure: "FnyOmQiFhUWjosCAh6eQN54uIqjzipy5Oydbdyh/OxH9Mf3eswOT2GHdOwhA4pYn39OR8ZEyGgrKa2J08wchpPisxFCC5+3+a+ki/wN1lI3H1A7Yr5qLY5ZSL9JPEM7dgkfeh0N510PqU5dOMWuZnOzpSieE5tAVqbP6bHS/vD07ryLbNbTRlwtZDSun3+SbMAJmPgqX/9rAVcGf2MfQfU6peOD/qBCWfvJtGS5iJPIcCELP840TZSK94+sCuctiQ/4sziZ9I7bB94OCsBqJDvn5bqYakQL4bt5+jh2LAwVoYUHeQozqJ7lCiY3LeZLurQz6Ny5dspzntHY9+JS0GW8bX3EWK7zIKyUW7Agnd4H1rB36PX2XwD7BVZRKk6CBrAU2cZtJbRN4t/0NyySb+t3unoHyJM43HoGEBHxNOvTcwfI/XqaRDanDKl3XmtF0V63LtbdOvWrxkpPlbdu1ly04oo1CCj3hStE3QxKMkTTWLELn/pI8HePG6BF8udozPdUXv1DbIb0UhyJu/AVoRewFEVNQhRwcFfGEEn+bSymBzTMU/hu6KM0M+bsgf8gugNsCKnSvvHSEmr+kJFVnDEt2uXlIDxVAydSES2xwJbsLMQItv4RNzQErbAPrzsuv+xnjVBndA4c3oRzDPTBOEy96OzF5Bqe/+vs0rIPFBjI="

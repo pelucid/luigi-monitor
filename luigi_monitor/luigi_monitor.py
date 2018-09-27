@@ -33,44 +33,58 @@ class SlackNotifications(object):
         self.raised_events = raised_events
         self.max_print = max_print
 
+    @property
+    def _no_raised_events_attachment(self):
+        return self._get_event_attachment(
+            '*No raised events (Success/Failure/Missing)* - possibly:\n  - job not run\n  - job already run\n... No new data to process?',
+            '#f7a70a')
+
     def get_slack_message_attachments(self):
         attachments = []
         for event in self.slack_events:
             if event in self.raised_events:
-                self._create_attachment(event, attachments)
+                event_attachment = self._create_attachment(event)
+                attachments.append(event_attachment)
+        if not attachments:
+            attachments.append(self._no_raised_events_attachment)
+        return attachments
 
-        return {"attachments": attachments}
-
-    def _create_attachment(self, event, attachments):
-        event_attachment = self._get_event_attachment(event)
+    def _create_attachment(self, event):
+        event_attachment = self._get_event_attachment("*{}*".format(self.events_message_cfg[event]['title']),
+                                                      self.events_message_cfg[event]['color'])
         if len(self.raised_events[event]) > self.max_print:
-            event_attachment['fields'][0]['value'] = self.max_print_message(event)
+            event_attachment['fields'][0]['value'] = self._max_print_message(event)
         else:
-            event_tasks = self.event_task_message(event)
-            event_attachment['fields'][0]['value'] = event_tasks
-        attachments.append(event_attachment)
+            event_tasks = self._event_task_message(event)
+            if event_tasks:
+                event_attachment['fields'][0]['value'] = event_tasks
+        return event_attachment
 
-    def event_task_message(self, event):
+    def _event_task_message(self, event):
         event_tasks = []
         for task in self.raised_events[event]:
+
+            if event == FAILURE:
+                event_tasks.append("Task: {}; Exception: {}".format(task['task'], task['exception']))
+
+            if event == MISSING:
+                event_tasks.append(task)
+
             if event == SUCCESS:
                 event_tasks.append("Task: {}".format(task['task']))
-            elif event == FAILURE:
-                event_tasks.append("Task: {}; Exception: {}".format(task['task'], task['exception']))
-            elif event == MISSING:
-                event_tasks.append(task)
+
         event_tasks = "\n".join(event_tasks)
         return event_tasks
 
-    def max_print_message(self, event):
+    def _max_print_message(self, event):
         return "More than {} {}. Please check logs.".format(
             str(self.max_print), self.events_message_cfg[event]['title'].lower())
 
-    def _get_event_attachment(self, event):
+    def _get_event_attachment(self, event_title, event_color):
         """See https://api.slack.com/docs/message-attachments (for our luigi-monitor status messages)"""
         return {
-            "text": self.events_message_cfg[event]['title'],
-            "color": self.events_message_cfg[event]['color'],
+            "text": event_title,
+            "color": event_color,
             "fields": [{
                 "title": None,
                 "value": None,
@@ -83,10 +97,8 @@ def discovered(task, dependency):
     raise NotImplementedError
 
 
-def missing(task, message=None):
+def missing(task):
     task = str(task)
-    if message:
-        task = task + ' INFO: {}'.format(message)
     if 'Missing' in EVENTS:
         EVENTS['Missing'].append(task)
     else:
@@ -169,8 +181,7 @@ def format_message(max_print, job):
 
 def send_flow_result(slack_url, max_print, job):
     text, attachments = format_message(max_print, job)
-    payload = {'text': text}
-    payload.update(attachments)
+    payload = {'text': text, 'attachments': attachments}
     return send_message(slack_url, payload)
 
 

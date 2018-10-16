@@ -14,7 +14,7 @@ PRESENT = 'Present'
 
 
 class SlackNotifications(object):
-    slack_events = [SUCCESS, FAILURE, MISSING]
+    slack_events = [SUCCESS, FAILURE, MISSING, PRESENT]
     events_message_cfg = {
         SUCCESS: {
             'title': 'Successes',
@@ -29,7 +29,7 @@ class SlackNotifications(object):
             'color': '#439FE0'
         },
         PRESENT: {
-            'title': 'Task(s) not run - already run or no new data to process',
+            'title': 'Task(s) not run (probably already run or no new data to process)',
             'color': '#f7a70a'
         }
     }
@@ -115,7 +115,6 @@ def missing(task):
 
 def present(task):
     task = str(task)
-
     if 'Present' in EVENTS:
         EVENTS['Present'].append(task)
     else:

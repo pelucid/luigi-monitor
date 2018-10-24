@@ -4,6 +4,7 @@ from six import iteritems
 from luigi_monitor.luigi_monitor import (SUCCESS,
                                          FAILURE,
                                          MISSING,
+                                         PRESENT,
                                          SlackNotifications)
 
 
@@ -54,6 +55,8 @@ def expected_slack_attachments(request):
      [('Failures', 'danger', 'Task: FailureLuigiTask(); Exception: Exception()')]),
     # Missing slack attachment
     ({MISSING: ['MissingLuigiTask()']}, [('Tasks with missing dependencies', '#439FE0', 'MissingLuigiTask()')]),
+    # Present slack attachment
+    ({PRESENT: ['PresentLuigiTask()']}, [('Task(s) not run (probably already run or no new data to process)', '#f7a70a', 'PresentLuigiTask()')]),
     # Success + Success
     ({SUCCESS: [{'task': 'SuccessLuigiTask()'}, {'task': 'SuccessLuigiTask()'}]},
      [('Successes', 'good', 'Task: SuccessLuigiTask()\nTask: SuccessLuigiTask()')]),

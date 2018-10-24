@@ -10,10 +10,11 @@ EVENTS = {}
 SUCCESS = 'Success'
 FAILURE = 'Failure'
 MISSING = 'Missing'
+PRESENT = 'Present'
 
 
 class SlackNotifications(object):
-    slack_events = [SUCCESS, FAILURE, MISSING]
+    slack_events = [SUCCESS, FAILURE, MISSING, PRESENT]
     events_message_cfg = {
         SUCCESS: {
             'title': 'Successes',
@@ -26,6 +27,10 @@ class SlackNotifications(object):
         MISSING: {
             'title': 'Tasks with missing dependencies',
             'color': '#439FE0'
+        },
+        PRESENT: {
+            'title': 'Task(s) not run (probably already run or no new data to process)',
+            'color': '#f7a70a'
         }
     }
 
@@ -67,7 +72,7 @@ class SlackNotifications(object):
             if event == FAILURE:
                 event_tasks.append("Task: {}; Exception: {}".format(task['task'], task['exception']))
 
-            if event == MISSING:
+            if event in [MISSING, PRESENT]:
                 event_tasks.append(task)
 
             if event == SUCCESS:
@@ -106,7 +111,11 @@ def missing(task):
 
 
 def present(task):
-    raise NotImplementedError
+    task = str(task)
+    if 'Present' in EVENTS:
+        EVENTS['Present'].append(task)
+    else:
+        EVENTS['Present'] = [task]
 
 
 def broken(task, exception):
@@ -142,6 +151,9 @@ def success(task):
     if 'Missing' in EVENTS:
         EVENTS['Missing'] = [missing for missing in EVENTS['Missing']
                              if task not in missing]
+    if 'Present' in EVENTS:
+        EVENTS['Present'] = [present for present in EVENTS['Present']
+                             if task not in present]
 
 
 def processing_time(task, time):
@@ -208,7 +220,7 @@ def send_message(slack_url, payload):
 
 
 @contextmanager
-def monitor(EVENTS=['FAILURE', 'DEPENDENCY_MISSING', 'SUCCESS'],
+def monitor(EVENTS=['FAILURE', 'DEPENDENCY_MISSING', 'SUCCESS', 'DEPENDENCY_PRESENT'],
             slack_url=None, max_print=10,
             job_name=os.path.basename(inspect.stack()[-1][1])):
     if EVENTS:

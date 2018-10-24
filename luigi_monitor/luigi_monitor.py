@@ -72,10 +72,7 @@ class SlackNotifications(object):
             if event == FAILURE:
                 event_tasks.append("Task: {}; Exception: {}".format(task['task'], task['exception']))
 
-            if event == MISSING:
-                event_tasks.append(task)
-
-            if event == PRESENT:
+            if event in [MISSING, PRESENT]:
                 event_tasks.append(task)
 
             if event == SUCCESS:

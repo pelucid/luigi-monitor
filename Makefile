@@ -13,4 +13,5 @@ test:
 	pytest tests/
 
 deps: venv
+	pip install --upgrade pip==18.1
 	pip install -r requirements.txt

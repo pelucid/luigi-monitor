@@ -209,8 +209,8 @@ def send_validation_warning(slack_url, user, warning, job_name):
 
 def send_message(slack_url, payload):
     if not slack_url:
-        print "slack_url not provided. Message will not be sent"
-        print payload['text']
+        print("slack_url not provided. Message will not be sent")
+        print(payload['text'])
         return False
 
     r = requests.post(slack_url, data=json.dumps(payload))

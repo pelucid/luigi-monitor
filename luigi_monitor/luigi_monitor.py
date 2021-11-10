@@ -220,7 +220,7 @@ def send_message(slack_url, payload):
 
 
 @contextmanager
-def monitor(EVENTS=['FAILURE', 'DEPENDENCY_MISSING', 'SUCCESS', 'DEPENDENCY_PRESENT'],
+def monitor(EVENTS=['FAILURE', 'DEPENDENCY_MISSING'],  # By default not including success events to avoid clogging slack
             slack_url=None, max_print=10,
             job_name=os.path.basename(inspect.stack()[-1][1])):
     if EVENTS:

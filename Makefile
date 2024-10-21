@@ -5,7 +5,7 @@ install:
 	poetry install --no-interaction --no-ansi
 
 test:
-	pytest --cov-report term-missing --cov-report html --cov=gi_library_template --cov-branch tests/
+	pytest --cov-report term-missing --cov-report html --cov=luigi-monitor --cov-branch tests/
 
 build:
 	poetry build

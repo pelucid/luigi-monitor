@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "luigi-monitor"
+version = "0.2.4"
+homepage = "https://github.com/pelucid/luigi-monitor"
+description = "This is a forked library, to send summary messages of our Luigi jobs to Slack."
+classifiers = [
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.11",
+]
+readme = "README.md"
+authors = ["Adzact"]
+license = "Proprietary"
+
+[tool.poetry.dependencies]
+python = "~3.9 || ~3.11"
+requests = "^2.32.3"
+luigi = "^3.5.2"
+httpretty = "^1.1.4"
+
+[tool.poetry.dev-dependencies]
+pytest = "^8.0.0"
+pytest-cov = "^5.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "pypi-public"
+url = "https://pypi.org/simple/"
+
+[[tool.poetry.source]]
+name = "gi-pypi"
+url = "https://growthintelligence-048965452656.d.codeartifact.eu-west-1.amazonaws.com/pypi/gi-pypi/simple/"
+priority = "supplemental"

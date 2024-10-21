@@ -1,0 +1,18 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+      - integration
+  pull_request:
+  schedule:
+      - cron: '0 2 * * *' # Runs daily at 2AM
+  release:
+    types: [published]
+
+jobs:
+  call-reusable-workflow:
+    uses: pelucid/ga_base/.github/workflows/poetry_python_library.yml@main
+    secrets:
+      GA_SLACK_BOT_TOKEN: ${{secrets.GA_SLACK_BOT_TOKEN}}

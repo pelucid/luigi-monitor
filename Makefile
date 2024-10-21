@@ -1,16 +1,15 @@
-################## BOILER PLATE CHECKS ##########
+CODEARTIFACT_AUTH_TOKEN := $(shell aws codeartifact get-authorization-token --domain growthintelligence --domain-owner 048965452656 --query authorizationToken --output text)
 
-# Guard against running Make commands outside a virtualenv
-venv:
-ifndef VIRTUAL_ENV
-$(error VIRTUALENV is not set - please activate environment)
-endif
-
-############### PUBLIC API #############
-
+install:
+	poetry config http-basic.gi-pypi aws $(CODEARTIFACT_AUTH_TOKEN)
+	poetry install --no-interaction --no-ansi
 
 test:
-	pytest tests/
+	pytest --cov-report term-missing --cov-report html --cov=gi_library_template --cov-branch tests/
 
-deps: venv
-	pip install -r requirements.txt
+build:
+	poetry build
+
+publish: build
+	poetry config repositories.gi-pypi-publish  https://growthintelligence-048965452656.d.codeartifact.eu-west-1.amazonaws.com/pypi/gi-pypi/
+	poetry publish --repository gi-pypi-publish --username aws --password $(CODEARTIFACT_AUTH_TOKEN)

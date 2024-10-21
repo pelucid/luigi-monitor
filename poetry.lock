@@ -269,6 +269,21 @@ url = "https://pypi.org/simple"
 reference = "pypi-public"
 
 [[package]]
+name = "httpretty"
+version = "1.1.4"
+description = "HTTP client mock for Python"
+optional = false
+python-versions = ">=3"
+files = [
+    {file = "httpretty-1.1.4.tar.gz", hash = "sha256:20de0e5dd5a18292d36d928cc3d6e52f8b2ac73daec40d41eb62dee154933b68"},
+]
+
+[package.source]
+type = "legacy"
+url = "https://pypi.org/simple"
+reference = "pypi-public"
+
+[[package]]
 name = "idna"
 version = "3.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -628,4 +643,4 @@ reference = "pypi-public"
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.9 || ~3.11"
-content-hash = "41362e871026cd2eee5b9e551e56997c3fff1469799ad8e0af48b029905270ef"
+content-hash = "8c126d680f0d8452889715fee06b807549ffb79bd1cf1e1c53c98b4a8b717913"
